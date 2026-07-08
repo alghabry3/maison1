@@ -5,6 +5,8 @@ import { cn } from '../lib/utils';
 import { MOCK_PRODUCTS } from '../data';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
+import { useCart } from '../context/CartContext';
+import { Preview3DModal } from '../components/Preview3DModal';
 
 const STEPS = [
   { id: 1, titleAr: 'الوعاء', titleEn: 'Container', icon: Package },
@@ -128,19 +130,55 @@ const Preview3DContainer = ({ type, wrapColor, ribbonColor, isRotating, scale = 
 export function GiftCustomization() {
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const { addToCart } = useCart();
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedBox, setSelectedBox] = useState<string | null>(null);
+  const [transitionMessage, setTransitionMessage] = useState<string | null>(null);
   
   // Step 2 State
   const [selectedProducts, setSelectedProducts] = useState<{product: any, quantity: number}[]>([]);
 
+  const selectedContainerDetails = useMemo(() => CONTAINERS.find(c => c.id === selectedBox), [selectedBox]);
+  const containerPrice = selectedContainerDetails?.price || 0;
+  const containerCapacity = selectedContainerDetails?.capacity || 0;
+  const containerType = selectedContainerDetails?.type || 'box';
+  
+  const totalProductsQuantity = useMemo(() => {
+    return selectedProducts.reduce((sum, item) => sum + item.quantity, 0);
+  }, [selectedProducts]);
+
+  const isAtCapacity = totalProductsQuantity >= containerCapacity;
+
+  const totalProductsPrice = useMemo(() => {
+    return selectedProducts.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+  }, [selectedProducts]);
+
   const handleAddProduct = (product: any) => {
+    if (totalProductsQuantity >= containerCapacity) return;
+
     setSelectedProducts(prev => {
       const existing = prev.find(p => p.product.id === product.id);
+      let updated;
       if (existing) {
-        return prev.map(p => p.product.id === product.id ? { ...p, quantity: p.quantity + 1 } : p);
+        updated = prev.map(p => p.product.id === product.id ? { ...p, quantity: p.quantity + 1 } : p);
+      } else {
+        updated = [...prev, { product, quantity: 1 }];
       }
-      return [...prev, { product, quantity: 1 }];
+
+      // Check if newly updated total quantity has reached container capacity
+      const newTotal = updated.reduce((sum, item) => sum + item.quantity, 0);
+      if (newTotal >= containerCapacity) {
+        setTransitionMessage(language === 'ar' 
+          ? 'تم ملء الوعاء بالكامل! جاري الانتقال لمرحلة التغليف والرسالة...' 
+          : 'Container is full! Transitioning to wrapping & message stage...'
+        );
+        setTimeout(() => {
+          setCurrentStep(3);
+          setTransitionMessage(null);
+        }, 1200);
+      }
+
+      return updated;
     });
   };
 
@@ -153,21 +191,6 @@ export function GiftCustomization() {
       return prev.filter(p => p.product.id !== productId);
     });
   };
-
-  const totalProductsPrice = useMemo(() => {
-    return selectedProducts.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
-  }, [selectedProducts]);
-
-  const selectedContainerDetails = useMemo(() => CONTAINERS.find(c => c.id === selectedBox), [selectedBox]);
-  const containerPrice = selectedContainerDetails?.price || 0;
-  const containerCapacity = selectedContainerDetails?.capacity || 0;
-  const containerType = selectedContainerDetails?.type || 'box';
-  
-  const totalProductsQuantity = useMemo(() => {
-    return selectedProducts.reduce((sum, item) => sum + item.quantity, 0);
-  }, [selectedProducts]);
-
-  const isAtCapacity = totalProductsQuantity >= containerCapacity;
   
   // Step 3 State
   const [selectedCard, setSelectedCard] = useState(CARD_DESIGNS[0]);
@@ -177,6 +200,32 @@ export function GiftCustomization() {
   const [wrapColor, setWrapColor] = useState(WRAPPING_COLORS[0].color);
   const [ribbonColor, setRibbonColor] = useState(RIBBON_COLORS[0].color);
   const [isRotating, setIsRotating] = useState(false);
+  const [isPreview3DOpen, setIsPreview3DOpen] = useState(false);
+
+  const handleNextStep = () => {
+    if (currentStep === 4) {
+      const customGiftProduct = {
+        id: `custom-gift-${Date.now()}`,
+        name: language === 'ar' 
+          ? `هدية مخصصة (${selectedContainerDetails?.nameAr || 'وعاء'})` 
+          : `Custom Gift (${selectedContainerDetails?.nameEn || 'Container'})`,
+        price: containerPrice + totalProductsPrice + WRAPPING_PRICE + DELIVERY_PRICE,
+        category: 'بوكسات هدايا',
+        image: selectedContainerDetails?.img || 'https://images.unsplash.com/photo-1549007994-cb92caebd54b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+        description: language === 'ar'
+          ? `بوكس مخصص يحتوي على ${totalProductsQuantity} قطعة شوكولاتة فاخرة. تغليف بلون ${wrapColor} مع شريطة ${ribbonColor}.`
+          : `Custom gift containing ${totalProductsQuantity} premium chocolates. Wrapped in ${wrapColor} paper with ${ribbonColor} ribbon.`,
+        descriptionEn: `Custom gift containing ${totalProductsQuantity} premium chocolates. Wrapped in ${wrapColor} paper with ${ribbonColor} ribbon.`,
+        inStock: true,
+        defaultUom: 'uom_piece'
+      };
+
+      addToCart(customGiftProduct as any, 1);
+      navigate('/checkout');
+    } else {
+      setCurrentStep(prev => Math.min(4, prev + 1));
+    }
+  };
 
   return (
     <div className="bg-brand-ivory min-h-screen py-12">
@@ -239,7 +288,17 @@ export function GiftCustomization() {
                 {CONTAINERS.map(container => (
                   <button 
                     key={container.id}
-                    onClick={() => setSelectedBox(container.id)}
+                    onClick={() => {
+                      setSelectedBox(container.id);
+                      setTransitionMessage(language === 'ar' 
+                        ? 'تم اختيار الوعاء! جاري الانتقال لتشكيل الشوكولاتة...' 
+                        : 'Container selected! Transitioning to chocolate assortment...'
+                      );
+                      setTimeout(() => {
+                        setCurrentStep(2);
+                        setTransitionMessage(null);
+                      }, 1000);
+                    }}
                     className={cn(
                       "text-right rounded-sm overflow-hidden border-2 transition-all group flex flex-col h-full",
                       selectedBox === container.id ? "border-brand-gold shadow-lg transform -translate-y-1" : "border-brand-black/5 hover:border-brand-gold/30 bg-white hover:shadow-md"
@@ -478,6 +537,15 @@ export function GiftCustomization() {
                   >
                     <Rotate3D className="w-5 h-5" />
                   </button>
+
+                  <button 
+                    onClick={() => setIsPreview3DOpen(true)}
+                    className="absolute top-4 left-4 p-2 bg-white rounded-full shadow-sm text-brand-gray hover:text-brand-gold border border-brand-gold/10 hover:border-brand-gold/30 transition-all duration-300 z-20 flex items-center gap-1.5 text-xs font-bold px-3 cursor-pointer shadow-sm active:scale-95"
+                    title={language === 'ar' ? 'معاينة ثلاثية الأبعاد تفاعلية' : 'Interactive 3D Preview'}
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-brand-gold animate-pulse" />
+                    <span>{language === 'ar' ? 'معاينة تفاعلية تفصيلية' : 'Full 3D Preview'}</span>
+                  </button>
                   
                   <div className="text-sm font-bold text-brand-black/60 uppercase tracking-wider mb-8 z-20">
                     {language === 'ar' ? 'معاينة التغليف' : 'Wrapping Preview'}
@@ -617,10 +685,13 @@ export function GiftCustomization() {
                   </div>
                   
                   <div className="absolute bottom-6 left-0 right-0 text-center z-20">
-                    <span className="bg-black/50 text-brand-gold px-4 py-2 rounded-sm text-sm font-bold backdrop-blur-md border border-brand-gold/30 inline-flex items-center gap-2">
-                       <Rotate3D className="w-4 h-4" />
+                    <button 
+                      onClick={() => setIsPreview3DOpen(true)}
+                      className="bg-brand-black/85 text-brand-gold hover:bg-brand-gold hover:text-brand-black px-5 py-2.5 rounded-sm text-sm font-bold backdrop-blur-md border border-brand-gold/40 inline-flex items-center gap-2 transition-all duration-300 hover:scale-105 shadow-xl active:scale-95 cursor-pointer"
+                    >
+                       <Rotate3D className="w-4 h-4 animate-spin-slow" />
                        {language === 'ar' ? 'معاينة ثلاثية الأبعاد عالية الدقة' : 'High-Definition 3D Preview'}
-                    </span>
+                    </button>
                   </div>
                 </div>
 
@@ -737,7 +808,7 @@ export function GiftCustomization() {
 
           <Button 
             variant="primary" 
-            onClick={() => setCurrentStep(prev => Math.min(4, prev + 1))}
+            onClick={handleNextStep}
             disabled={currentStep === 1 && !selectedBox}
             className="flex gap-2 px-8"
           >
@@ -751,6 +822,23 @@ export function GiftCustomization() {
             )}
           </Button>
         </div>
+
+        {/* Elegant Auto-Transition Notification */}
+        {transitionMessage && (
+          <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 bg-brand-black/95 text-brand-gold border border-brand-gold/30 px-6 py-4 rounded-lg shadow-[0_10px_30px_rgba(0,0,0,0.5)] flex items-center gap-3 animate-fade-in backdrop-blur-md max-w-[90vw] text-center font-bold">
+            <div className="w-4 h-4 border-2 border-brand-gold border-t-transparent rounded-full animate-spin shrink-0" />
+            <span className="text-sm tracking-wide">{transitionMessage}</span>
+          </div>
+        )}
+
+        <Preview3DModal 
+          isOpen={isPreview3DOpen}
+          onClose={() => setIsPreview3DOpen(false)}
+          type={containerType}
+          wrapColor={wrapColor}
+          ribbonColor={ribbonColor}
+          selectedProducts={selectedProducts}
+        />
 
       </div>
     </div>

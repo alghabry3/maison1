@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Search, User, ShoppingBag, Menu, Heart, Palette, Truck, X, Globe, Star } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { MaisonHLogo } from './MaisonHLogo';
 import { useState, useEffect, useRef } from 'react';
 import { useWishlist } from '../context/WishlistContext';
 import { useCart } from '../context/CartContext';
@@ -196,35 +197,8 @@ export function Header() {
 
           {/* Logo Group - Luxury Crest & Typography */}
           <div className="flex-1 lg:w-1/3 flex justify-center text-center">
-            <Link to="/" className="flex flex-col items-center group relative py-1">
-              {/* Brand Crest */}
-              <div className="relative flex items-center justify-center mb-1.5 transition-all duration-500 group-hover:scale-105">
-                {/* Thin golden background radial glow */}
-                <div className="absolute w-12 h-12 bg-brand-gold/5 rounded-full filter blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                
-                {/* Double circular frames */}
-                <div className="absolute w-9 h-9 rounded-full border border-brand-gold/30 group-hover:border-brand-gold/60 transition-colors duration-500" />
-                <div className="absolute w-[30px] h-[30px] rounded-full border border-dashed border-brand-gold/40 animate-[spin_50s_linear_infinite]" />
-                
-                {/* Core monogram block */}
-                <div className="w-6 h-6 rounded-full bg-brand-dark/95 border border-brand-gold flex items-center justify-center shadow-lg relative z-10">
-                  <span className="font-serif text-[11px] font-black text-brand-gold tracking-normal">H</span>
-                </div>
-
-                {/* Star jewel pin decoration */}
-                <div className="absolute -top-1 w-1 h-1 bg-brand-gold/85 rotate-45" />
-                <div className="absolute -bottom-1 w-1 h-1 bg-brand-gold/85 rotate-45" />
-              </div>
-
-              {/* Brand Letters */}
-              <div className="flex flex-col items-center">
-                <span className="font-serif text-lg md:text-xl font-bold tracking-[0.2em] text-brand-gold group-hover:text-brand-ivory transition-colors duration-500 uppercase leading-none">
-                  {language === 'ar' ? 'ميزون إتش' : 'MAISON H'}
-                </span>
-                <span className="text-[6.5px] md:text-[8px] tracking-[0.25em] uppercase text-brand-ivory/50 group-hover:text-brand-gold/85 transition-colors duration-500 mt-1.5 font-sans font-black">
-                  {language === 'ar' ? 'شوكولاتة بلجيكية فاخرة' : 'PREMIUM BELGIAN CHOCOLATIER'}
-                </span>
-              </div>
+            <Link to="/" className="flex flex-col items-center py-1">
+              <MaisonHLogo size="md" />
             </Link>
           </div>
 
@@ -342,23 +316,7 @@ export function Header() {
             {/* Header with Brand Crest */}
             <div className="flex items-center justify-between border-b border-brand-gold/10 pb-5 mb-6">
               <div className="flex items-center gap-3">
-                {/* Mini Crest Emblem */}
-                <div className="relative flex items-center justify-center w-8 h-8 shrink-0">
-                  <div className="absolute w-8 h-8 rounded-full border border-brand-gold/30" />
-                  <div className="absolute w-6.5 h-6.5 rounded-full border border-dashed border-brand-gold/25" />
-                  <div className="w-5 h-5 rounded-full bg-brand-dark border border-brand-gold/80 flex items-center justify-center text-[10px] font-serif font-black text-brand-gold">
-                    H
-                  </div>
-                </div>
-                
-                <div className="flex flex-col">
-                  <span className="font-serif text-base font-bold tracking-[0.12em] text-brand-gold uppercase leading-tight">
-                    {language === 'ar' ? 'ميزون إتش' : 'MAISON H'}
-                  </span>
-                  <span className="text-[7px] tracking-[0.2em] uppercase text-brand-ivory/50 mt-0.5 font-bold">
-                    {language === 'ar' ? 'شوكولاتة بلجيكية فاخرة' : 'BELGIAN CHOCOLATIER'}
-                  </span>
-                </div>
+                <MaisonHLogo size="sm" alignment="left" showSubtext={language === 'ar' ? 'شوكولاتة بلجيكية' : 'BELGIAN CHOCOLATIER'} />
               </div>
               <button 
                 onClick={() => setIsMobileMenuOpen(false)}

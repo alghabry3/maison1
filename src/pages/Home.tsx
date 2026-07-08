@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Button } from '../components/Button';
 import { ProductCard } from '../components/ProductCard';
 import { RecommendedSection } from '../components/RecommendedSection';
@@ -63,8 +64,49 @@ export function Home() {
     setOpenFaq(openFaq === index ? null : index);
   };
 
+  const homeTitle = language === 'ar'
+    ? 'ميزون إتش | الشوكولاتة البلجيكية والسويسرية الفاخرة بالرياض'
+    : 'Maison H | Luxury Belgian & Swiss Chocolate in Riyadh';
+  const homeDesc = language === 'ar'
+    ? 'اكتشفوا أرقى تشكيلات الشوكولاتة البلجيكية والسويسرية من ميزون إتش. نوفر هدايا شوكولاتة مخصصة، صواني ضيافة فاخرة، وتوصيل سريع ومبرد في الرياض.'
+    : 'Discover the finest Belgian and Swiss chocolate collections from Maison H. We offer customized chocolate gifts, luxurious serving trays, and express cold-chain delivery in Riyadh.';
+  const homeUrl = typeof window !== 'undefined' ? window.location.origin : '';
+
   return (
     <div className="flex flex-col min-h-screen">
+      <Helmet>
+        <title>{homeTitle}</title>
+        <meta name="description" content={homeDesc} />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content={homeTitle} />
+        <meta property="og:description" content={homeDesc} />
+        <meta property="og:image" content="https://images.unsplash.com/photo-1606312619070-d48b4c652a52?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80" />
+        <meta property="og:url" content={homeUrl} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={homeTitle} />
+        <meta name="twitter:description" content={homeDesc} />
+        <meta name="twitter:image" content="https://images.unsplash.com/photo-1606312619070-d48b4c652a52?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80" />
+        <meta name="keywords" content={language === 'ar'
+          ? "شوكولاتة فاخرة, شوكولاتة بلجيكية, متجر شوكولاتة الرياض, هدايا شوكولاتة, بوكس هدايا, صواني ضيافة, ميزون اتش"
+          : "luxury chocolate, belgian chocolate, chocolate riyadh, chocolate gifts, premium chocolate box, Maison H"
+        } />
+        {/* Structured Data for local business / online shop */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Store",
+            "name": "Maison H",
+            "image": "https://images.unsplash.com/photo-1606312619070-d48b4c652a52?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80",
+            "description": homeDesc,
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": "Riyadh",
+              "addressCountry": "SA"
+            },
+            "priceRange": "$$$"
+          })}
+        </script>
+      </Helmet>
       
       {/* Hero Section */}
       <section className="relative h-[85vh] min-h-[600px] flex items-center overflow-hidden bg-brand-dark">

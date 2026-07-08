@@ -1,5 +1,6 @@
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { MOCK_PRODUCTS } from '../data';
 import { Button } from '../components/Button';
 import { Heart, Share2, ShieldCheck, Truck, Check, Star, Instagram, Twitter, MessageCircle, Sparkles, Search, ThumbsUp, CheckCircle, MessageSquare, Copy, Mail } from 'lucide-react';
@@ -132,6 +133,7 @@ const DEFAULT_REVIEWS: Record<string, ReviewItem[]> = {
 export function ProductDetail() {
   const { language } = useLanguage();
   const { id } = useParams();
+  const navigate = useNavigate();
   const product = MOCK_PRODUCTS.find(p => p.id === id) || MOCK_PRODUCTS[0];
   const [quantity, setQuantity] = useState(1);
   const { toggleWishlist, isInWishlist } = useWishlist();
@@ -291,6 +293,11 @@ export function ProductDetail() {
     setTimeout(() => setIsAdded(false), 2000);
   };
 
+  const handleBuyNow = () => {
+    addToCart(product, quantity, selectedUomId);
+    navigate('/checkout');
+  };
+
   if (isLoading) {
     return (
       <div className="bg-brand-ivory min-h-screen py-12">
@@ -333,8 +340,61 @@ export function ProductDetail() {
     );
   }
 
+  const pageTitle = language === 'ar'
+    ? `${product.name} | ميزون إتش - Maison H`
+    : `${product.nameEn || product.name} | Maison H - Premium Chocolate`;
+  const pageDesc = language === 'ar'
+    ? product.description
+    : product.descriptionEn || product.description;
+  const pageUrl = typeof window !== 'undefined' ? window.location.href : '';
+
   return (
     <div className="bg-brand-ivory min-h-screen py-12">
+      <Helmet>
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDesc} />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="product" />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDesc} />
+        <meta property="og:image" content={product.image} />
+        <meta property="og:url" content={pageUrl} />
+        <meta property="og:site_name" content="Maison H" />
+
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={pageDesc} />
+        <meta name="twitter:image" content={product.image} />
+
+        {/* Dynamic SEO keywords */}
+        <meta name="keywords" content={language === 'ar' 
+          ? `شوكولاتة, حلويات, هدايا, بلجيكية, فاخرة, ${product.name}, ميزون إتش, مناسبات` 
+          : `chocolate, premium, belgian, gifts, luxury, sweet, ${product.nameEn || product.name}, Maison H`} 
+        />
+
+        {/* Structured Data (JSON-LD) for Google Search Console & Rich Snippets */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org/",
+            "@type": "Product",
+            "name": language === 'ar' ? product.name : product.nameEn || product.name,
+            "image": [product.image],
+            "description": pageDesc,
+            "sku": product.id,
+            "offers": {
+              "@type": "Offer",
+              "url": pageUrl,
+              "priceCurrency": "SAR",
+              "price": product.price,
+              "itemCondition": "https://schema.org/NewCondition",
+              "availability": product.inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
+            }
+          })}
+        </script>
+      </Helmet>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Breadcrumb */}
@@ -743,7 +803,7 @@ export function ProductDetail() {
               </Button>
             </div>
 
-            <Button variant="gold" size="lg" className="w-full mb-8">
+            <Button variant="gold" size="lg" className="w-full mb-8" onClick={handleBuyNow}>
               {language === 'ar' ? 'شراء الآن (إتمام الدفع السريع)' : 'Buy Now (Express Checkout)'}
             </Button>
 

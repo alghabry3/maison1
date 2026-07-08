@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { CreditCard, Smartphone } from 'lucide-react';
+import { MaisonHLogo } from './MaisonHLogo';
 
 export function Footer() {
   return (
@@ -8,10 +9,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8 mb-16">
           
           <div className="space-y-6">
-            <div className="flex flex-col">
-              <span className="font-serif text-3xl font-bold tracking-[0.2em] text-brand-gold">MAISON H</span>
-              <span className="text-[10px] tracking-[0.4em] uppercase text-brand-ivory/60 mt-1 font-sans">CHOCOLATIER DE LUXE</span>
-            </div>
+            <MaisonHLogo size="custom" customSize={64} alignment="left" showSubtext="CHOCOLATIER DE LUXE" />
             <p className="text-brand-gray text-sm leading-relaxed max-w-xs">
               شوكولاتة أوروبية فاخرة، وهدايا مصممة لتترك أثراً لا يُنسى في كل مناسباتكم.
             </p>

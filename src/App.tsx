@@ -1,6 +1,7 @@
 import React, { useLayoutEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
+import { HelmetProvider } from 'react-helmet-async';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { Home } from './pages/Home';
@@ -141,21 +142,23 @@ function AppContent() {
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <LanguageProvider>
-        <CartProvider>
-          <WishlistProvider>
-            <CompareProvider>
-              <QuickTrackProvider>
-                <Router>
-                  <AppContent />
-                </Router>
-              </QuickTrackProvider>
-            </CompareProvider>
-          </WishlistProvider>
-        </CartProvider>
-      </LanguageProvider>
-    </ThemeProvider>
+    <HelmetProvider>
+      <ThemeProvider>
+        <LanguageProvider>
+          <CartProvider>
+            <WishlistProvider>
+              <CompareProvider>
+                <QuickTrackProvider>
+                  <Router>
+                    <AppContent />
+                  </Router>
+                </QuickTrackProvider>
+              </CompareProvider>
+            </WishlistProvider>
+          </CartProvider>
+        </LanguageProvider>
+      </ThemeProvider>
+    </HelmetProvider>
   );
 }
 
