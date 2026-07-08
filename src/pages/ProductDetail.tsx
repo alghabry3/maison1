@@ -2,7 +2,7 @@ import { useParams, Link } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import { MOCK_PRODUCTS } from '../data';
 import { Button } from '../components/Button';
-import { Heart, Share2, ShieldCheck, Truck, Check, Star, Instagram, Twitter, MessageCircle, Sparkles, Search, ThumbsUp, CheckCircle, MessageSquare } from 'lucide-react';
+import { Heart, Share2, ShieldCheck, Truck, Check, Star, Instagram, Twitter, MessageCircle, Sparkles, Search, ThumbsUp, CheckCircle, MessageSquare, Copy, Mail } from 'lucide-react';
 import { useWishlist } from '../context/WishlistContext';
 import { useCart } from '../context/CartContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -142,6 +142,7 @@ export function ProductDetail() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeImage, setActiveImage] = useState(product.image);
   const [lensPosition, setLensPosition] = useState({ x: 0, y: 0 });
+  const [isCopied, setIsCopied] = useState(false);
   
   const uomsList = getUoms();
   const compatibleUoms = uomsList.filter(u => u.category === product.uomCategory);
@@ -747,32 +748,111 @@ export function ProductDetail() {
             </Button>
 
             {/* Share */}
-            <div className="flex items-center gap-4 mb-8">
-              <span className="text-sm font-bold text-brand-black">
-                {language === 'ar' ? 'شارك المنتج:' : 'Share Product:'}
-              </span>
-              <div className="flex items-center gap-2">
+            <div className="bg-brand-brown/5 border border-brand-gold/25 rounded-md p-5 mb-8 animate-fade-in shadow-2xs">
+              <div className="flex items-center justify-between mb-4 border-b border-brand-brown/10 pb-2">
+                <span className="font-serif text-sm font-bold text-brand-black flex items-center gap-1.5">
+                  <Share2 className="w-4 h-4 text-brand-gold animate-pulse" />
+                  {language === 'ar' ? 'شارك فخامة الشوكولاتة' : 'Share the Luxury'}
+                </span>
+                <span className="text-[10px] uppercase tracking-wider text-brand-gold font-mono font-semibold">
+                  {language === 'ar' ? 'نشر المتعة الفاخرة' : 'Spread the Taste'}
+                </span>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3">
+                {/* WhatsApp button */}
                 <button 
-                  onClick={() => window.open('https://instagram.com', '_blank')}
-                  className="w-10 h-10 rounded-full border border-brand-brown/20 flex items-center justify-center text-brand-gray hover:text-brand-brown hover:border-brand-brown transition-colors"
-                  aria-label="Share on Instagram"
-                >
-                  <Instagram className="w-4 h-4" />
-                </button>
-                <button 
-                  onClick={() => window.open('https://wa.me/?text=تفقد هذا المنتج الرائع', '_blank')}
-                  className="w-10 h-10 rounded-full border border-brand-brown/20 flex items-center justify-center text-brand-gray hover:text-green-600 hover:border-green-600 transition-colors"
+                  onClick={() => {
+                    const shareText = language === 'ar' 
+                      ? `استمتع بالفخامة البلجيكية الفاخرة مع: *${product.name}*! تفضل بزيارة الرابط: ${window.location.href}`
+                      : `Indulge in premium Belgian luxury: *${product.nameEn || product.name}*! Check it out: ${window.location.href}`;
+                    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`, '_blank');
+                  }}
+                  className="h-10 px-3.5 rounded-sm border border-brand-brown/10 hover:border-green-600 hover:bg-green-50 text-brand-gray hover:text-green-600 flex items-center gap-2 text-xs font-semibold bg-white transition-all duration-300 shadow-3xs cursor-pointer"
                   aria-label="Share on WhatsApp"
                 >
                   <MessageCircle className="w-4 h-4" />
+                  <span>WhatsApp</span>
                 </button>
+
+                {/* Twitter / X button */}
                 <button 
-                  onClick={() => window.open('https://twitter.com/intent/tweet?text=تفقد هذا المنتج الرائع', '_blank')}
-                  className="w-10 h-10 rounded-full border border-brand-brown/20 flex items-center justify-center text-brand-gray hover:text-blue-400 hover:border-blue-400 transition-colors"
+                  onClick={() => {
+                    const shareText = language === 'ar'
+                      ? `اكتشف سحر الشوكولاتة البلجيكية الاستثنائية مع ${product.name} ✨ ${window.location.href}`
+                      : `Discover exquisite Belgian chocolate textures with ${product.nameEn || product.name} ✨ ${window.location.href}`;
+                    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`, '_blank');
+                  }}
+                  className="h-10 px-3.5 rounded-sm border border-brand-brown/10 hover:border-blue-400 hover:bg-blue-50 text-brand-gray hover:text-blue-500 flex items-center gap-2 text-xs font-semibold bg-white transition-all duration-300 shadow-3xs cursor-pointer"
                   aria-label="Share on X"
                 >
                   <Twitter className="w-4 h-4" />
+                  <span>Twitter</span>
                 </button>
+
+                {/* Email button */}
+                <button 
+                  onClick={() => {
+                    const subject = language === 'ar' 
+                      ? `شوكولاتة بلجيكية فاخرة - ${product.name}`
+                      : `Exquisite Belgian Chocolate - ${product.nameEn || product.name}`;
+                    const body = language === 'ar'
+                      ? `أوصيك بتجربة هذه الشوكولاتة البلجيكية الرائعة من متجرنا: ${window.location.href}`
+                      : `Check out this incredible luxury chocolate: ${window.location.href}`;
+                    window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
+                  }}
+                  className="h-10 px-3.5 rounded-sm border border-brand-brown/10 hover:border-brand-brown hover:bg-brand-brown/5 text-brand-gray hover:text-brand-brown flex items-center gap-2 text-xs font-semibold bg-white transition-all duration-300 shadow-3xs cursor-pointer"
+                  aria-label="Share via Email"
+                >
+                  <Mail className="w-4 h-4" />
+                  <span>{language === 'ar' ? 'بريد' : 'Email'}</span>
+                </button>
+
+                {/* Copy Link Button */}
+                <button 
+                  onClick={() => {
+                    navigator.clipboard.writeText(window.location.href).then(() => {
+                      setIsCopied(true);
+                      setTimeout(() => setIsCopied(false), 2000);
+                    });
+                  }}
+                  className={cn(
+                    "h-10 px-4 rounded-sm border flex items-center gap-2 text-xs font-bold transition-all duration-300 shadow-3xs cursor-pointer relative overflow-hidden",
+                    isCopied 
+                      ? "border-green-600 bg-green-600 text-white" 
+                      : "border-brand-gold bg-brand-gold text-brand-black hover:bg-brand-gold/90"
+                  )}
+                  aria-label="Copy to clipboard"
+                >
+                  {isCopied ? (
+                    <>
+                      <Check className="w-4 h-4 animate-scaleIn" />
+                      <span className="animate-scaleIn">{language === 'ar' ? 'تم نسخ الرابط!' : 'Link Copied!'}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-4 h-4" />
+                      <span>{language === 'ar' ? 'نسخ الرابط الفاخر' : 'Copy Exquisite Link'}</span>
+                    </>
+                  )}
+                </button>
+
+                {/* Native Share fallback if available */}
+                {typeof navigator !== 'undefined' && navigator.share && (
+                  <button 
+                    onClick={() => {
+                      navigator.share({
+                        title: language === 'ar' ? product.name : product.nameEn || product.name,
+                        text: language === 'ar' ? `شاهد هذه الشوكولاتة الفاخرة` : `Check out this luxury chocolate`,
+                        url: window.location.href
+                      }).catch(() => {});
+                    }}
+                    className="h-10 w-10 rounded-sm border border-brand-brown/15 bg-white text-brand-gray hover:text-brand-brown hover:border-brand-brown flex items-center justify-center transition-all duration-300 shadow-3xs cursor-pointer"
+                    title={language === 'ar' ? 'المشاركة عبر نظام التشغيل' : 'System Share'}
+                  >
+                    <Share2 className="w-4 h-4" />
+                  </button>
+                )}
               </div>
             </div>
 

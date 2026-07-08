@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '../components/Button';
 import { MOCK_PRODUCTS } from '../data';
-import { Gift, Check, Trash2, Plus, Minus, Truck } from 'lucide-react';
+import { Gift, Check, Trash2, Plus, Minus, Truck, FileText } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useLanguage } from '../context/LanguageContext';
 import { useCart } from '../context/CartContext';
@@ -23,6 +23,13 @@ export function Checkout() {
   const [wrappingPaper, setWrappingPaper] = useState('none');
   const [ribbon, setRibbon] = useState('none');
   
+  // Personalized message card states
+  const [hasMessageCard, setHasMessageCard] = useState(false);
+  const [cardStyle, setCardStyle] = useState('classic_ivory');
+  const [cardRecipient, setCardRecipient] = useState('');
+  const [cardSender, setCardSender] = useState('');
+  const [cardMessage, setCardMessage] = useState('');
+  
   const [orderStatus, setOrderStatus] = useState<'idle' | 'processing' | 'success'>('idle');
   const [boxOpened, setBoxOpened] = useState(false);
 
@@ -33,7 +40,9 @@ export function Checkout() {
   
   const subtotal = cartTotal;
   const shipping = subtotal === 0 ? 0 : (subtotal >= freeShippingThreshold ? 0 : 30);
-  const wrappingPrice = wrappingPaper !== 'none' ? 25 : 0;
+  const baseWrappingPrice = wrappingPaper !== 'none' ? 25 : 0;
+  const cardPrice = hasMessageCard ? 10 : 0;
+  const wrappingPrice = baseWrappingPrice + cardPrice;
   const discount = (redeemPoints && showLoyalty) ? maxDiscount : 0;
   const total = subtotal + shipping + wrappingPrice - discount;
   
@@ -275,6 +284,155 @@ export function Checkout() {
                     </div>
                   </div>
                 )}
+
+                {/* Personalized Message Card Subsection */}
+                <div className="border-t border-brand-brown/10 pt-6 mt-6">
+                  <label className="flex items-center gap-3 cursor-pointer group">
+                    <input 
+                      type="checkbox" 
+                      checked={hasMessageCard}
+                      onChange={(e) => setHasMessageCard(e.target.checked)}
+                      className="w-5 h-5 rounded border-brand-brown/30 text-brand-brown focus:ring-brand-brown accent-brand-brown cursor-pointer"
+                    />
+                    <div className="flex flex-col">
+                      <span className="font-serif text-sm font-bold text-brand-black group-hover:text-brand-gold transition-colors flex items-center gap-1.5">
+                        <FileText className="w-4 h-4 text-brand-gold" />
+                        {language === 'ar' ? 'إضافة بطاقة إهداء فاخرة (+10 ر.س)' : 'Add Premium Gift Card (+10 SAR)'}
+                      </span>
+                      <span className="text-xs text-brand-gray">
+                        {language === 'ar' ? 'اكتب رسالة خاصة بخط اليد وبطاقة مذهبة' : 'Write a customized handwritten-style gilded message card'}
+                      </span>
+                    </div>
+                  </label>
+
+                  {hasMessageCard && (
+                    <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-6 animate-fade-in bg-brand-ivory/20 border border-brand-gold/15 p-5 rounded-md">
+                      {/* Left: Inputs */}
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-[11px] uppercase tracking-wider text-brand-gold font-bold mb-2">
+                            {language === 'ar' ? 'تصميم البطاقة الفاخرة' : 'Premium Card Design'}
+                          </label>
+                          <div className="grid grid-cols-2 gap-2">
+                            {[
+                              { id: 'classic_ivory', ar: 'عاجي كلاسيكي', en: 'Classic Ivory' },
+                              { id: 'midnight_gold', ar: 'أسود ملكي مذهب', en: 'Midnight Gold' },
+                              { id: 'rose_romance', ar: 'مخمل وردي', en: 'Rose Velvet' },
+                              { id: 'royal_emerald', ar: 'أخضر زمردي', en: 'Royal Emerald' }
+                            ].map(card => (
+                              <button
+                                key={card.id}
+                                type="button"
+                                onClick={() => setCardStyle(card.id)}
+                                className={cn(
+                                  "p-2.5 rounded text-xs text-center font-semibold border transition-all cursor-pointer",
+                                  cardStyle === card.id 
+                                    ? "ring-2 ring-brand-gold font-bold border-brand-gold bg-brand-gold/5" 
+                                    : "opacity-80 hover:opacity-100 bg-white border-brand-brown/15"
+                                )}
+                              >
+                                {language === 'ar' ? card.ar : card.en}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-xs text-brand-gray mb-1">
+                              {language === 'ar' ? 'إلى (اسم المستلم)' : 'To (Recipient)'}
+                            </label>
+                            <input 
+                              type="text" 
+                              value={cardRecipient}
+                              onChange={(e) => setCardRecipient(e.target.value)}
+                              placeholder={language === 'ar' ? 'عبدالعزيز...' : 'Recipient Name...'}
+                              className="w-full bg-white border border-brand-brown/15 rounded-md p-2.5 text-xs focus:outline-none focus:border-brand-gold"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs text-brand-gray mb-1">
+                              {language === 'ar' ? 'من (اسم المرسل)' : 'From (Sender)'}
+                            </label>
+                            <input 
+                              type="text" 
+                              value={cardSender}
+                              onChange={(e) => setCardSender(e.target.value)}
+                              placeholder={language === 'ar' ? 'سارة...' : 'Sender Name...'}
+                              className="w-full bg-white border border-brand-brown/15 rounded-md p-2.5 text-xs focus:outline-none focus:border-brand-gold"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <div className="flex justify-between items-center mb-1">
+                            <label className="block text-xs text-brand-gray">
+                              {language === 'ar' ? 'رسالة الإهداء الخاصة' : 'Gift Message'}
+                            </label>
+                            <span className="text-[10px] text-brand-gray font-mono">
+                              {cardMessage.length}/150
+                            </span>
+                          </div>
+                          <textarea 
+                            rows={3} 
+                            maxLength={150}
+                            value={cardMessage}
+                            onChange={(e) => setCardMessage(e.target.value)}
+                            placeholder={language === 'ar' ? 'اكتب أمنياتك وتمنياتك الطيبة هنا...' : 'Write your warm wishes and words here...'}
+                            className="w-full bg-white border border-brand-brown/15 rounded-md p-2.5 text-xs focus:outline-none focus:border-brand-gold"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Right: Live Preview */}
+                      <div className="flex flex-col justify-center items-center">
+                        <span className="text-[10px] uppercase tracking-wider text-brand-gold font-bold mb-2 self-start md:self-center">
+                          {language === 'ar' ? 'معاينة بطاقة الإهداء الحية' : 'Live Gift Card Preview'}
+                        </span>
+                        
+                        <div className={cn(
+                          "w-full max-w-[280px] h-[170px] rounded-lg shadow-lg border p-5 flex flex-col justify-between transition-all duration-300 relative overflow-hidden font-serif",
+                          cardStyle === 'classic_ivory' && "bg-[#FAF8F5] border-amber-900/20 text-amber-950",
+                          cardStyle === 'midnight_gold' && "bg-[#111111] border-brand-gold/30 text-brand-gold",
+                          cardStyle === 'rose_romance' && "bg-[#FFF0F2] border-[#8B263E]/20 text-[#6B1B2D]",
+                          cardStyle === 'royal_emerald' && "bg-[#0B2E1C] border-brand-gold/25 text-[#ECD9BA]"
+                        )}>
+                          {/* Inner elegant gold thin border */}
+                          <div className="absolute inset-2 border border-current/15 pointer-events-none rounded" />
+                          
+                          {/* Card Content */}
+                          <div className="relative z-10 flex flex-col h-full justify-between py-1 px-2">
+                            {/* Card Top */}
+                            <div className="flex justify-between text-[11px] font-bold border-b border-current/10 pb-1">
+                              <span>
+                                {language === 'ar' ? 'إلى: ' : 'To: '} 
+                                <span className="font-sans underline underline-offset-2">{cardRecipient || (language === 'ar' ? 'المستلم' : 'Someone Special')}</span>
+                              </span>
+                              <span>
+                                {language === 'ar' ? 'من: ' : 'From: '}
+                                <span className="font-sans underline underline-offset-2">{cardSender || (language === 'ar' ? 'المرسل' : 'You')}</span>
+                              </span>
+                            </div>
+
+                            {/* Message Body */}
+                            <div className="flex-1 flex items-center justify-center text-center my-2 text-xs italic font-medium leading-relaxed px-1 overflow-hidden select-none">
+                              <p className="line-clamp-4 font-sans font-medium text-xs break-words">
+                                {cardMessage || (language === 'ar' 
+                                  ? 'كل عام وأنتم بخير، مع أطيب التمنيات وأعذب اللحظات المليئة بالحب والشوكولاتة الفاخرة.'
+                                  : 'Wishing you the sweetest moments and a life full of delicious joy and exquisite luxury chocolate.')}
+                              </p>
+                            </div>
+
+                            {/* Brand Tagmark */}
+                            <div className="text-center text-[7px] tracking-[0.2em] opacity-60 uppercase border-t border-current/10 pt-1 font-sans">
+                              {language === 'ar' ? 'ميزون إتش بليجكا' : 'MAISON H BELGIUM'}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </section>
 
@@ -459,7 +617,11 @@ export function Checkout() {
                 </div>
                 {wrappingPrice > 0 && (
                   <div className="flex justify-between text-brand-gray">
-                    <span>{language === 'ar' ? 'تغليف الهدايا' : 'Gift Wrapping'}</span>
+                    <span>
+                      {language === 'ar' 
+                        ? `${baseWrappingPrice > 0 ? 'تغليف الهدايا' : ''}${baseWrappingPrice > 0 && cardPrice > 0 ? ' و ' : ''}${cardPrice > 0 ? 'بطاقة الإهداء' : ''}`
+                        : `${baseWrappingPrice > 0 ? 'Gift Wrapping' : ''}${baseWrappingPrice > 0 && cardPrice > 0 ? ' & ' : ''}${cardPrice > 0 ? 'Premium Card' : ''}`}
+                    </span>
                     <span>{wrappingPrice.toFixed(2)} {language === 'ar' ? 'ر.س' : 'SAR'}</span>
                   </div>
                 )}

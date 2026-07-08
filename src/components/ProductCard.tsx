@@ -6,6 +6,7 @@ import { Button } from './Button';
 import { useWishlist } from '../context/WishlistContext';
 import { useCart } from '../context/CartContext';
 import { useCompare } from '../context/CompareContext';
+import { useLanguage } from '../context/LanguageContext';
 import { cn } from '../lib/utils';
 
 interface ProductCardProps {
@@ -17,7 +18,9 @@ export function ProductCard({ product }: ProductCardProps) {
   const { toggleWishlist, isInWishlist } = useWishlist();
   const { addToCart } = useCart();
   const { addToCompare, removeFromCompare, isCompared, compareItems } = useCompare();
+  const { language } = useLanguage();
   const [isAdded, setIsAdded] = useState(false);
+  const [wishlistAlert, setWishlistAlert] = useState(false);
   const isWishlisted = isInWishlist(product.id);
   const isProductCompared = isCompared(product.id);
 
@@ -27,6 +30,14 @@ export function ProductCard({ product }: ProductCardProps) {
     addToCart(product, 1);
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 2000);
+  };
+
+  const handleWishlistToggle = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleWishlist(product.id);
+    setWishlistAlert(true);
+    setTimeout(() => setWishlistAlert(false), 1500);
   };
 
   const handleCompare = (e: React.MouseEvent) => {
@@ -54,17 +65,33 @@ export function ProductCard({ product }: ProductCardProps) {
 
       {/* Action Buttons */}
       <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
-        {/* Wishlist Button */}
-        <button 
-          onClick={() => toggleWishlist(product.id)}
-          className={cn(
-            "p-2 bg-white/80 backdrop-blur-sm rounded-full transition-colors",
-            isWishlisted ? "text-brand-brown" : "text-brand-gray hover:text-brand-brown hover:bg-white"
+        {/* Wishlist Button with popup feedback */}
+        <div className="relative">
+          <button 
+            onClick={handleWishlistToggle}
+            className={cn(
+              "p-2 bg-white/95 backdrop-blur-sm rounded-full shadow-sm transition-all duration-300 hover:scale-115 active:scale-95",
+              isWishlisted ? "text-brand-brown bg-white shadow-brand-brown/10" : "text-brand-gray hover:text-brand-brown hover:bg-white"
+            )}
+            title={isWishlisted 
+              ? (language === 'ar' ? 'إزالة من المفضلة' : 'Remove from Wishlist')
+              : (language === 'ar' ? 'أضف للمفضلة' : 'Add to Wishlist')
+            }
+          >
+            <Heart className={cn("w-4 h-4 transition-transform duration-300", isWishlisted && "fill-brand-brown text-brand-brown")} />
+          </button>
+          
+          {wishlistAlert && (
+            <div className={cn(
+              "absolute top-1/2 -translate-y-1/2 bg-brand-black/90 text-brand-gold text-[9px] px-2 py-1 rounded shadow-lg border border-brand-gold/20 whitespace-nowrap z-30 pointer-events-none animate-fadeIn",
+              language === 'ar' ? 'right-full mr-2' : 'left-full ml-2'
+            )}>
+              {isWishlisted 
+                ? (language === 'ar' ? 'تمت الإضافة للمفضلة!' : 'Added to Wishlist!') 
+                : (language === 'ar' ? 'تمت الإزالة!' : 'Removed!')}
+            </div>
           )}
-          title="أضف للمفضلة"
-        >
-          <Heart className={cn("w-4 h-4", isWishlisted && "fill-brand-brown")} />
-        </button>
+        </div>
         
         {/* Compare Button */}
         <button 

@@ -1,5 +1,6 @@
+import React, { useLayoutEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
-import { useLayoutEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { Home } from './pages/Home';
@@ -63,10 +64,11 @@ function ScrollToTop() {
   return null;
 }
 
-export default function App() {
+function AppContent() {
   const showCompare = localStorage.getItem('odoo-show-compare') !== 'false';
   const showWhatsapp = localStorage.getItem('odoo-show-whatsapp') !== 'false';
   const font = localStorage.getItem('odoo-font') || 'Tajawal';
+  const location = useLocation();
 
   useLayoutEffect(() => {
     // Dynamic Font application
@@ -78,6 +80,67 @@ export default function App() {
   }, [font]);
 
   return (
+    <>
+      <ScrollToTop />
+      <Routes location={location}>
+        <Route path="/admin" element={
+          <motion.div
+            key="admin"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.35, ease: [0.21, 0.47, 0.32, 0.98] }}
+            className="w-full flex-1 flex flex-col"
+          >
+            <AdminDashboard />
+          </motion.div>
+        } />
+        <Route
+          path="/*"
+          element={
+            <div className="flex flex-col min-h-screen bg-brand-black text-brand-ivory font-sans transition-colors duration-500">
+              <Header />
+              <main className="flex-1 pt-[104px] flex flex-col">
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.div
+                    key={location.pathname}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.35, ease: [0.21, 0.47, 0.32, 0.98] }}
+                    className="w-full flex-1 flex flex-col"
+                  >
+                    <Routes location={location}>
+                      <Route path="/" element={<Home />} />
+                      <Route path="/shop" element={<Shop />} />
+                      <Route path="/product/:id" element={<ProductDetail />} />
+                      <Route path="/gift-customization" element={<GiftCustomization />} />
+                      <Route path="/wrapping-guide" element={<WrappingGuide />} />
+                      <Route path="/gift-card" element={<GiftCard />} />
+                      <Route path="/checkout" element={<Checkout />} />
+                      <Route path="/track-order" element={<TrackOrder />} />
+                      <Route path="/wishlist" element={<Wishlist />} />
+                      <Route path="/profile" element={<Profile />} />
+                      <Route path="/help" element={<Help />} />
+                    </Routes>
+                  </motion.div>
+                </AnimatePresence>
+              </main>
+              {showCompare && <CompareWidget />}
+              {showWhatsapp && <WhatsAppButton />}
+              <FloatingNav />
+              <Footer />
+              <QuickTrackModal />
+            </div>
+          }
+        />
+      </Routes>
+    </>
+  );
+}
+
+export default function App() {
+  return (
     <ThemeProvider>
       <LanguageProvider>
         <CartProvider>
@@ -85,39 +148,8 @@ export default function App() {
             <CompareProvider>
               <QuickTrackProvider>
                 <Router>
-                <ScrollToTop />
-                <Routes>
-                  <Route path="/admin" element={<AdminDashboard />} />
-                  <Route
-                    path="/*"
-                    element={
-                      <div className="flex flex-col min-h-screen bg-brand-black text-brand-ivory font-sans transition-colors duration-500">
-                        <Header />
-                        <main className="flex-1 pt-[104px]">
-                          <Routes>
-                            <Route path="/" element={<Home />} />
-                            <Route path="/shop" element={<Shop />} />
-                            <Route path="/product/:id" element={<ProductDetail />} />
-                            <Route path="/gift-customization" element={<GiftCustomization />} />
-                            <Route path="/wrapping-guide" element={<WrappingGuide />} />
-                            <Route path="/gift-card" element={<GiftCard />} />
-                            <Route path="/checkout" element={<Checkout />} />
-                            <Route path="/track-order" element={<TrackOrder />} />
-                            <Route path="/wishlist" element={<Wishlist />} />
-                            <Route path="/profile" element={<Profile />} />
-                            <Route path="/help" element={<Help />} />
-                          </Routes>
-                        </main>
-                        {showCompare && <CompareWidget />}
-                        {showWhatsapp && <WhatsAppButton />}
-                        <FloatingNav />
-                        <Footer />
-                        <QuickTrackModal />
-                      </div>
-                    }
-                  />
-                </Routes>
-              </Router>
+                  <AppContent />
+                </Router>
               </QuickTrackProvider>
             </CompareProvider>
           </WishlistProvider>
