@@ -1,11 +1,12 @@
 import { Link } from 'react-router-dom';
-import { Search, User, ShoppingBag, Menu, Heart, Palette } from 'lucide-react';
+import { Search, User, ShoppingBag, Menu, Heart, Palette, Truck } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useState, useEffect, useRef } from 'react';
 import { useWishlist } from '../context/WishlistContext';
 import { useCart } from '../context/CartContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
+import { useQuickTrack } from '../context/QuickTrackContext';
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -14,6 +15,8 @@ export function Header() {
   const { cartCount, cartTotal } = useCart();
   const { language, toggleLanguage, t } = useLanguage();
   const { theme, setTheme } = useTheme();
+  const { openQuickTrack } = useQuickTrack();
+  const [headerOrderId, setHeaderOrderId] = useState('');
   
   const themeMenuRef = useRef<HTMLDivElement>(null);
 
@@ -64,6 +67,27 @@ export function Header() {
           </Link>
         </div>
         <div className="flex items-center gap-4 text-brand-gold max-md:hidden">
+          {/* Quick Track Input */}
+          <form 
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (headerOrderId.trim()) {
+                openQuickTrack(headerOrderId);
+                setHeaderOrderId('');
+              }
+            }}
+            className="flex items-center gap-1.5 bg-brand-black/40 border border-brand-gold/30 px-2 py-0.5 rounded focus-within:border-brand-gold/75 transition-all text-[11px]"
+          >
+            <Truck className="w-3.5 h-3.5 text-brand-gold animate-bounce shrink-0" />
+            <input 
+              type="text"
+              value={headerOrderId}
+              onChange={(e) => setHeaderOrderId(e.target.value)}
+              placeholder={language === 'ar' ? 'تتبع سريع...' : 'Quick Track...'}
+              className="bg-transparent text-white placeholder-brand-gold/45 w-24 text-[10px] focus:outline-none uppercase font-bold text-center"
+            />
+          </form>
+          <span>|</span>
           <div className="relative" ref={themeMenuRef}>
             <button 
               onClick={() => setShowThemeMenu(!showThemeMenu)} 
@@ -136,6 +160,14 @@ export function Header() {
             
             <div className={cn("relative flex items-center gap-2 lg:border-brand-gold/30", language === 'ar' ? 'pr-4 lg:border-r' : 'pl-4 lg:border-l')}>
               <span className="text-brand-gold hidden sm:block">{cartTotal.toFixed(2)} {language === 'ar' ? 'ر.س' : 'SAR'}</span>
+              <button 
+                id="header-quick-track-btn"
+                onClick={() => openQuickTrack('')} 
+                title={language === 'ar' ? 'تتبع سريع للطلب' : 'Quick Track Order'}
+                className="w-10 h-10 border border-brand-gold/30 flex items-center justify-center rounded-full text-brand-gold hover:bg-brand-gold/10 transition-all duration-200 hover:scale-105"
+              >
+                <Truck className="w-5 h-5" />
+              </button>
               <Link to="/profile" className="w-10 h-10 border border-brand-gold/30 flex items-center justify-center rounded-full text-brand-gold hover:bg-brand-gold/10 transition-colors">
                 <User className="w-5 h-5" />
               </Link>

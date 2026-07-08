@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'react';
 import { Button } from '../components/Button';
 import { MOCK_PRODUCTS } from '../data';
-import { Gift, Check, Trash2, Plus, Minus } from 'lucide-react';
+import { Gift, Check, Trash2, Plus, Minus, Truck } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useLanguage } from '../context/LanguageContext';
 import { useCart } from '../context/CartContext';
 import { getUoms, getPriceInUom } from '../utils/uom';
+import { useQuickTrack } from '../context/QuickTrackContext';
 
 export function Checkout() {
   const { language } = useLanguage();
   const { cartItems, cartTotal, cartCount, updateQuantity, removeFromCart } = useCart();
   const uomsList = getUoms();
+  const { openQuickTrack } = useQuickTrack();
   
   // Mock loyalty points data
   const userPoints = 500;
@@ -88,9 +90,20 @@ export function Checkout() {
                   {language === 'ar' ? 'شكراً لتسوقك معنا. سنقوم بتجهيز طلبك قريباً.' : 'Thank you for shopping with us. We will prepare your order shortly.'}
                 </p>
                 
-                <Button onClick={() => window.location.href = '/'}>
-                  {language === 'ar' ? 'العودة للرئيسية' : 'Back to Home'}
-                </Button>
+                <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
+                  <Button onClick={() => window.location.href = '/'}>
+                    {language === 'ar' ? 'العودة للرئيسية' : 'Back to Home'}
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    id="checkout-quick-track-btn"
+                    onClick={() => openQuickTrack('ORD-84392')}
+                    className="flex items-center gap-2"
+                  >
+                    <Truck className="w-4 h-4" />
+                    {language === 'ar' ? 'تتبع حالة طلبك سريعاً' : 'Quick Track Order Now'}
+                  </Button>
+                </div>
               </div>
 
               {/* The Gift Box */}

@@ -20,6 +20,8 @@ import { LanguageProvider } from './context/LanguageContext';
 import { CompareProvider } from './context/CompareContext';
 import { CompareWidget } from './components/CompareWidget';
 import { WhatsAppButton } from './components/WhatsAppButton';
+import { QuickTrackProvider } from './context/QuickTrackContext';
+import { QuickTrackModal } from './components/QuickTrackModal';
 
 import { ThemeProvider } from './context/ThemeContext';
 
@@ -81,39 +83,42 @@ export default function App() {
         <CartProvider>
           <WishlistProvider>
             <CompareProvider>
-              <Router>
-              <ScrollToTop />
-              <Routes>
-                <Route path="/admin" element={<AdminDashboard />} />
-                <Route
-                  path="/*"
-                  element={
-                    <div className="flex flex-col min-h-screen bg-brand-black text-brand-ivory font-sans transition-colors duration-500">
-                      <Header />
-                      <main className="flex-1 pt-[104px]">
-                        <Routes>
-                          <Route path="/" element={<Home />} />
-                          <Route path="/shop" element={<Shop />} />
-                          <Route path="/product/:id" element={<ProductDetail />} />
-                          <Route path="/gift-customization" element={<GiftCustomization />} />
-                          <Route path="/wrapping-guide" element={<WrappingGuide />} />
-                          <Route path="/gift-card" element={<GiftCard />} />
-                          <Route path="/checkout" element={<Checkout />} />
-                          <Route path="/track-order" element={<TrackOrder />} />
-                          <Route path="/wishlist" element={<Wishlist />} />
-                          <Route path="/profile" element={<Profile />} />
-                          <Route path="/help" element={<Help />} />
-                        </Routes>
-                      </main>
-                      {showCompare && <CompareWidget />}
-                      {showWhatsapp && <WhatsAppButton />}
-                      <FloatingNav />
-                      <Footer />
-                    </div>
-                  }
-                />
-              </Routes>
-            </Router>
+              <QuickTrackProvider>
+                <Router>
+                <ScrollToTop />
+                <Routes>
+                  <Route path="/admin" element={<AdminDashboard />} />
+                  <Route
+                    path="/*"
+                    element={
+                      <div className="flex flex-col min-h-screen bg-brand-black text-brand-ivory font-sans transition-colors duration-500">
+                        <Header />
+                        <main className="flex-1 pt-[104px]">
+                          <Routes>
+                            <Route path="/" element={<Home />} />
+                            <Route path="/shop" element={<Shop />} />
+                            <Route path="/product/:id" element={<ProductDetail />} />
+                            <Route path="/gift-customization" element={<GiftCustomization />} />
+                            <Route path="/wrapping-guide" element={<WrappingGuide />} />
+                            <Route path="/gift-card" element={<GiftCard />} />
+                            <Route path="/checkout" element={<Checkout />} />
+                            <Route path="/track-order" element={<TrackOrder />} />
+                            <Route path="/wishlist" element={<Wishlist />} />
+                            <Route path="/profile" element={<Profile />} />
+                            <Route path="/help" element={<Help />} />
+                          </Routes>
+                        </main>
+                        {showCompare && <CompareWidget />}
+                        {showWhatsapp && <WhatsAppButton />}
+                        <FloatingNav />
+                        <Footer />
+                        <QuickTrackModal />
+                      </div>
+                    }
+                  />
+                </Routes>
+              </Router>
+              </QuickTrackProvider>
             </CompareProvider>
           </WishlistProvider>
         </CartProvider>

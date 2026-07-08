@@ -138,8 +138,10 @@ export function ProductDetail() {
   const { addToCart } = useCart();
   const [isAdded, setIsAdded] = useState(false);
   const [isZoomed, setIsZoomed] = useState(false);
-  const [zoomStyle, setZoomStyle] = useState({ transformOrigin: '50% 50%' });
+  const [zoomStyle, setZoomStyle] = useState<React.CSSProperties>({});
   const [isLoading, setIsLoading] = useState(true);
+  const [activeImage, setActiveImage] = useState(product.image);
+  const [lensPosition, setLensPosition] = useState({ x: 0, y: 0 });
   
   const uomsList = getUoms();
   const compatibleUoms = uomsList.filter(u => u.category === product.uomCategory);
@@ -147,6 +149,7 @@ export function ProductDetail() {
   
   useEffect(() => {
     setSelectedUomId(product.defaultUom || 'uom_piece');
+    setActiveImage(product.image);
   }, [product]);
 
   const selectedUomObj = uomsList.find(u => u.id === selectedUomId);
@@ -270,9 +273,13 @@ export function ProductDetail() {
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
-    const x = ((e.clientX - left) / width) * 100;
-    const y = ((e.clientY - top) / height) * 100;
-    setZoomStyle({ transformOrigin: `${x}% ${y}%` });
+    const x = e.clientX - left;
+    const y = e.clientY - top;
+    const xPercent = (x / width) * 100;
+    const yPercent = (y / height) * 100;
+    
+    setLensPosition({ x, y });
+    setZoomStyle({ backgroundPosition: `${xPercent}% ${yPercent}%` });
   };
   
   const isWishlisted = isInWishlist(product.id);
@@ -343,38 +350,93 @@ export function ProductDetail() {
           {/* Images */}
           <div className="w-full md:w-1/2 flex flex-col gap-4">
             <div 
-              className="aspect-[4/5] bg-brand-light-gray rounded-sm overflow-hidden border border-brand-black/5 relative cursor-zoom-in group"
+              className="aspect-[4/5] bg-brand-light-gray rounded-sm overflow-hidden border border-brand-black/5 relative cursor-none group"
               onMouseEnter={() => setIsZoomed(true)}
               onMouseLeave={() => setIsZoomed(false)}
               onMouseMove={handleMouseMove}
             >
               <img 
-                src={product.image} 
+                src={activeImage} 
                 alt={language === 'ar' ? product.name : product.nameEn || product.name} 
-                className={cn(
-                  "w-full h-full object-cover",
-                  isZoomed ? "scale-[2.5]" : "scale-100"
-                )}
-                style={{
-                  ...(isZoomed ? zoomStyle : { transformOrigin: '50% 50%' }),
-                  transition: isZoomed 
-                    ? 'transform 0.7s cubic-bezier(0.16, 1, 0.3, 1)' 
-                    : 'transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform-origin 0.8s cubic-bezier(0.16, 1, 0.3, 1)'
-                }}
+                className="w-full h-full object-cover select-none animate-fadeIn"
               />
               {product.isNew && (
-                <span className="absolute top-4 right-4 bg-brand-gold text-brand-black text-xs font-bold px-3 py-1.5 rounded-sm uppercase tracking-wider pointer-events-none">
+                <span className="absolute top-4 right-4 bg-brand-gold text-brand-black text-[10px] font-bold px-2.5 py-1.5 rounded-sm uppercase tracking-wider pointer-events-none z-10">
                   {language === 'ar' ? 'جديد' : 'New'}
                 </span>
               )}
-            </div>
-            {/* Thumbnail Gallery mock */}
-            <div className="flex gap-4 overflow-x-auto pb-2">
-              <div className="w-24 h-24 rounded-sm bg-brand-light-gray flex-shrink-0 border-2 border-brand-brown overflow-hidden cursor-pointer">
-                <img src={product.image} className="w-full h-full object-cover" alt="" />
+              
+              {/* Dynamic instruction badge that hides on hover */}
+              <div className="absolute bottom-4 left-4 right-4 bg-brand-black/85 backdrop-blur-xs text-brand-ivory text-[11px] py-2 px-4 rounded border border-brand-gold/30 text-center opacity-100 group-hover:opacity-0 transition-opacity duration-300 pointer-events-none flex items-center justify-center gap-1.5 font-sans z-10">
+                <Sparkles className="w-3.5 h-3.5 text-brand-gold animate-pulse" />
+                <span>
+                  {language === 'ar' 
+                    ? 'مرر الماوس لاستكشاف تفاصيل الشوكولاتة الفاخرة بعدسة مكبرة' 
+                    : 'Hover cursor to inspect luxury chocolate textures with our magnifier lens'}
+                </span>
               </div>
-              <div className="w-24 h-24 rounded-sm bg-brand-light-gray flex-shrink-0 opacity-60 hover:opacity-100 transition-opacity cursor-pointer"></div>
-              <div className="w-24 h-24 rounded-sm bg-brand-light-gray flex-shrink-0 opacity-60 hover:opacity-100 transition-opacity cursor-pointer"></div>
+
+              {/* Magnifying Glass Lens */}
+              {isZoomed && (
+                <div 
+                  className="absolute pointer-events-none rounded-full border-2 border-brand-gold bg-no-repeat transition-opacity duration-150 ease-out z-20"
+                  style={{
+                    width: '180px',
+                    height: '180px',
+                    left: `${lensPosition.x}px`,
+                    top: `${lensPosition.y}px`,
+                    transform: 'translate(-50%, -50%)',
+                    backgroundImage: `url(${activeImage})`,
+                    backgroundSize: '350%',
+                    backgroundPosition: zoomStyle.backgroundPosition || '50% 50%',
+                    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.6), inset 0 0 24px rgba(0,0,0,0.35), 0 0 0 4px rgba(200, 164, 106, 0.2)'
+                  }}
+                >
+                  {/* Gloss reflection overlay inside lens */}
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-transparent via-white/5 to-white/20 pointer-events-none" />
+                  
+                  {/* Reticle / target dot */}
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="w-1.5 h-1.5 rounded-full bg-brand-gold/30"></div>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            {/* Thumbnail Gallery with high resolution luxury chocolate textures */}
+            <div className="flex gap-4 overflow-x-auto pb-2">
+              {[
+                product.image,
+                "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&w=800&q=80", // Melted luxury chocolate glaze
+                "https://images.unsplash.com/photo-1511381939415-e44015466834?auto=format&fit=crop&w=800&q=80"  // Cocoa powder dusting texture
+              ].map((imgUrl, idx) => {
+                const isActive = imgUrl === activeImage;
+                let label = '';
+                if (idx === 0) {
+                  label = language === 'ar' ? 'المنتج' : 'Product';
+                } else if (idx === 1) {
+                  label = language === 'ar' ? 'ملمس القوام' : 'Glaze Close-up';
+                } else {
+                  label = language === 'ar' ? 'مسحوق الكاكاو' : 'Cocoa Texture';
+                }
+                return (
+                  <button
+                    key={idx}
+                    onClick={() => setActiveImage(imgUrl)}
+                    className={cn(
+                      "w-24 h-24 rounded-sm bg-brand-light-gray flex-shrink-0 overflow-hidden cursor-pointer relative transition-all duration-300",
+                      isActive 
+                        ? "border-2 border-brand-gold shadow-md scale-105" 
+                        : "border border-brand-black/10 opacity-70 hover:opacity-100 hover:border-brand-gold/50"
+                    )}
+                  >
+                    <img src={imgUrl} className="w-full h-full object-cover select-none" alt="" />
+                    <span className="absolute bottom-1 left-1 right-1 bg-brand-black/75 backdrop-blur-xs text-[9px] text-brand-ivory rounded px-1 text-center py-0.5 truncate pointer-events-none font-sans">
+                      {label}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
