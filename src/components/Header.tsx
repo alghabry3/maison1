@@ -98,10 +98,13 @@ export function Header() {
               <span>{language === 'ar' ? 'المظهر' : 'Theme'}</span>
             </button>
             {showThemeMenu && (
-              <div className="absolute top-full mt-2 right-0 bg-brand-black border border-brand-gold/30 rounded shadow-xl py-2 w-32 z-50">
-                <button onClick={() => { setTheme('default'); setShowThemeMenu(false); }} className={cn("w-full text-left px-4 py-1.5 hover:bg-brand-gold/20 transition-colors", theme === 'default' && 'text-white font-bold')}>{language === 'ar' ? 'الكلاسيكي' : 'Classic'}</button>
-                <button onClick={() => { setTheme('winter'); setShowThemeMenu(false); }} className={cn("w-full text-left px-4 py-1.5 hover:bg-brand-gold/20 transition-colors", theme === 'winter' && 'text-white font-bold')}>{language === 'ar' ? 'الشتاء' : 'Winter'}</button>
-                <button onClick={() => { setTheme('spring'); setShowThemeMenu(false); }} className={cn("w-full text-left px-4 py-1.5 hover:bg-brand-gold/20 transition-colors", theme === 'spring' && 'text-white font-bold')}>{language === 'ar' ? 'الربيع' : 'Spring'}</button>
+              <div className="absolute top-full mt-2 right-0 bg-brand-black border border-brand-gold/30 rounded shadow-xl py-2 w-36 z-50">
+                <button onClick={() => { setTheme('default'); setShowThemeMenu(false); }} className={cn("w-full text-left px-4 py-1.5 hover:bg-brand-gold/20 transition-colors text-xs", theme === 'default' && 'text-white font-bold')}>{language === 'ar' ? 'الكلاسيكي' : 'Classic'}</button>
+                <button onClick={() => { setTheme('winter'); setShowThemeMenu(false); }} className={cn("w-full text-left px-4 py-1.5 hover:bg-brand-gold/20 transition-colors text-xs", theme === 'winter' && 'text-white font-bold')}>{language === 'ar' ? 'الشتاء' : 'Winter'}</button>
+                <button onClick={() => { setTheme('spring'); setShowThemeMenu(false); }} className={cn("w-full text-left px-4 py-1.5 hover:bg-brand-gold/20 transition-colors text-xs", theme === 'spring' && 'text-white font-bold')}>{language === 'ar' ? 'الربيع' : 'Spring'}</button>
+                <button onClick={() => { setTheme('eid'); setShowThemeMenu(false); }} className={cn("w-full text-left px-4 py-1.5 hover:bg-brand-gold/20 transition-colors text-xs", theme === 'eid' && 'text-white font-bold')}>{language === 'ar' ? 'العيد الفاخر' : 'Royal Eid'}</button>
+                <button onClick={() => { setTheme('valentine'); setShowThemeMenu(false); }} className={cn("w-full text-left px-4 py-1.5 hover:bg-brand-gold/20 transition-colors text-xs", theme === 'valentine' && 'text-white font-bold')}>{language === 'ar' ? 'المخملي' : 'Velvet Valentine'}</button>
+                <button onClick={() => { setTheme('corporate'); setShowThemeMenu(false); }} className={cn("w-full text-left px-4 py-1.5 hover:bg-brand-gold/20 transition-colors text-xs", theme === 'corporate' && 'text-white font-bold')}>{language === 'ar' ? 'الشركات الأنيق' : 'Sleek Corporate'}</button>
               </div>
             )}
           </div>

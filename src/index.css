@@ -57,6 +57,36 @@
     --theme-light-gray: #E8EDE9;
   }
 
+  .theme-eid {
+    --theme-black: #061F12;
+    --theme-dark: #0D2C1C;
+    --theme-ivory: #F6F9F6;
+    --theme-brown: #14452B;
+    --theme-gold: #D5A952;
+    --theme-gray: #708C7D;
+    --theme-light-gray: #E5EDE8;
+  }
+
+  .theme-valentine {
+    --theme-black: #1B0C10;
+    --theme-dark: #271116;
+    --theme-ivory: #FFF8F9;
+    --theme-brown: #8B263E;
+    --theme-gold: #E2959E;
+    --theme-gray: #9C7E83;
+    --theme-light-gray: #F3E5E7;
+  }
+
+  .theme-corporate {
+    --theme-black: #0A1118;
+    --theme-dark: #101B26;
+    --theme-ivory: #F4F7F9;
+    --theme-brown: #1E2E3D;
+    --theme-gold: #C5A059;
+    --theme-gray: #768696;
+    --theme-light-gray: #E2E8F0;
+  }
+
   html {
     scroll-behavior: smooth;
   }

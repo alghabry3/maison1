@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-type Theme = 'default' | 'winter' | 'spring';
+type Theme = 'default' | 'winter' | 'spring' | 'eid' | 'valentine' | 'corporate';
 
 interface ThemeContextType {
   theme: Theme;
@@ -19,7 +19,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('app-theme', theme);
     
     // Remove all theme classes first
-    document.documentElement.classList.remove('theme-winter', 'theme-spring');
+    document.documentElement.classList.remove(
+      'theme-winter', 
+      'theme-spring', 
+      'theme-eid', 
+      'theme-valentine', 
+      'theme-corporate'
+    );
     
     // Add the new theme class if it's not default
     if (theme !== 'default') {
